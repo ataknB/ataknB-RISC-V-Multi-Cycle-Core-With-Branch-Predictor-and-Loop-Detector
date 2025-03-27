@@ -4,7 +4,7 @@ module Processor_Top #(
 	input logic rst,
 	input logic clk
 );
-	sa
+
 	//logic [WIDTH-1:0]jump; 
 	logic [WIDTH-1:0]jump_EX; 
 	logic [WIDTH-1:0]jump_MEM; 
@@ -118,7 +118,15 @@ module Processor_Top #(
 
 	);	
 
-	
+	logic [31:0]Branch_Calculation_Kogge_Stone;
+
+	Kogge_Stone Branch_Calculation(
+		.in0(PC_out_F),
+		.in1(BP_imm),
+		.overflow(),
+		.sub_en(1'b0),
+		.out(Branch_Calculation_Kogge_Stone)
+	);
 	
 	Gshare_BP Gshare_BP(
 		.clk(clk),
@@ -134,31 +142,27 @@ module Processor_Top #(
 
 	);
 
-	/*
-	BTB BTB(
+	logic LD_en;
+	logic loop_decision;
+
+	LoopDetector LoopDetector(
 		.clk(clk),
 		.rst(rst),
+
 		.PC_F(PC_out_F),
 		.PC_EX(PC_out_EX),
-		.Branch_Destinaiton(branch_EX),
-		.write_en(BP_en_EX),
-		.read_en(BP_en_F),
-		.Branch_Decision(Branch_Calculation_BTB)
-	);
+		.PC_destination(Branch_Calculation_Kogge_Stone),
 
-	logic [31:0]wire_x;
-	assign wire_x = ()
-	*/
+		.branch_en_F(BP_en_F),
+		.branch_en_EX(BP_en_EX),
+
+		.feedback_from_ALU(alu_branch_control_EX),
+
+		.loop_decision(loop_decision),
+		.LD_en(LD_en)
+	);
 	
-	logic [31:0]Branch_Calculation_Kogge_Stone;
-
-	Kogge_Stone Branch_Calculation(
-		.in0(PC_out_F),
-		.in1(BP_imm),
-		.overflow(),
-		.sub_en(1'b0),
-		.out(Branch_Calculation_Kogge_Stone)
-	);
+	
 
 //////////////////////////////////////////////////		
 	Decode_Register Decode_Reg_(
