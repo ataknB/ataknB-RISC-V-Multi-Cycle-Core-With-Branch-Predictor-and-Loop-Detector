@@ -7,6 +7,8 @@ module Sign_Extender(
 	output logic [31:0]imm_out
 );
 
+	logic x;
+
 	always_comb
 	begin
 		if(sign_extender_en)
@@ -61,7 +63,7 @@ module Sign_Extender(
 		
 		else
 		begin
-			imm_out		=	32'd0;
+			x		=	1'd0;
 		end
 	end
 

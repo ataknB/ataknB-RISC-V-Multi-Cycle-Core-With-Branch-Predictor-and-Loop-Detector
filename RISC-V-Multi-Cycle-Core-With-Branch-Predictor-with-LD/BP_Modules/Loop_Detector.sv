@@ -25,8 +25,8 @@ module LoopDetector #(
     logic loop_en;
 
     Kogge_Stone Comparator(
-        .in0(PC),
-        .in1(PC_destination),
+        .in0(PC_destination),
+        .in1(PC_F),
         .sub_en(1'b1),
         .out(comparator_out)
     );
@@ -42,17 +42,21 @@ module LoopDetector #(
             for(i = 0; i < 256 ; i = i+1)
             begin
                 counter_table[i] <= 8'd0;
-                counter_table[i] <= {1'd1 , 8'd0};
+                memory_table[i] <= {1'd1 , 8'd0};
             end
         end
 
         else
         begin
-            if(branch_en_F)
+            if(loop_en && branch_en_F)
             begin
-                
-                temp_counter <= counter_table[PC_F[7:0]] + 1'b1;
+                //memory_table[PC_F[7:0]][8] <= 1'd1;
+                counter_table[PC_F[7:0]] <= counter_table[PC_F[7:0]] + 8'd1;
+                temp_counter <= counter_table[PC_F[7:0]] + 8'd1;
+                /*
                 counter_table[PC_F[7:0]] <= temp_counter;
+                */
+                
             end
 
             else
@@ -65,18 +69,26 @@ module LoopDetector #(
                 if(feedback_from_ALU)
                 begin
                     memory_table[PC_EX[7:0]][7:0] <= counter_table[PC_EX][7:0];
+                    memory_table[PC_EX[7:0]][8] <= 1'b1;
                 end
 
                 else 
                 begin
-                    memory_table[PC_EX[7:0]][7:0] <= counter_table[PC_EX][7:0] - 1'b1;
-                    counter_table[PC_EX[7:0]][8:0] <= 9'd0;
+                    memory_table[PC_EX[7:0]][8] <= 1'd0;
+                    counter_table[PC_EX[7:0]][7:0] <= 8'd0;
                 end
+            end
+
+            else 
+            begin
+
             end
         end
     end
 
-    assign LD_en = memory_table[PC_EX[7:0]][8];
+    assign LD_en = memory_table[PC_F[7:0]][8];
+
+    assign loop_decision = (LD_en) ? (memory_table[PC_F[7:0]][7:0] - counter_table[PC_F[7:0]] >= 0) ? 1'b1 : 1'b0 : 1'b0;
 
 
     

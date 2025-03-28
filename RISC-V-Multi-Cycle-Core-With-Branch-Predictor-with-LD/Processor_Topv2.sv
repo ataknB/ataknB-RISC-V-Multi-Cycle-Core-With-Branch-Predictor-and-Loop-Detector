@@ -57,10 +57,9 @@ module Processor_Top #(
 	logic BP_decision_DE;
 	logic BP_decision_EX;
 
-	Kogge_Stone PC_normal(
+	Kogge_Stone PC_Increment(
 		.in0(PC_out_F),
 		.in1(32'd4),
-		.overflow(),
 		.sub_en(1'b0),
 		.out(normal_F)
 	);
@@ -111,7 +110,7 @@ module Processor_Top #(
 
 	logic [31:0]BP_imm;
 
-	Fetch_Decoder BP_Decoder(
+	Fetch_Decoder Fetch_Decoder(
 		.inst(InstructionMemory_out_F),
 		.branch_en(BP_en_F),
 		.imm_out(BP_imm)
@@ -123,27 +122,31 @@ module Processor_Top #(
 	Kogge_Stone Branch_Calculation(
 		.in0(PC_out_F),
 		.in1(BP_imm),
-		.overflow(),
 		.sub_en(1'b0),
 		.out(Branch_Calculation_Kogge_Stone)
 	);
-	
+
+	logic Gshare_Decision;
+
 	Gshare_BP Gshare_BP(
 		.clk(clk),
 		.rst(rst),
 
 		.branch_en_F(BP_en_F),
+		.branch_en_EX(BP_en_EX),
+
 		.PC_F(PC_out_F[13:0]),
 		.PC_EX(PC_out_EX[13:0]),
 
 		.branch_result(alu_branch_control_EX),
-		.branch_en_EX(BP_en_EX),
-		.BP_decision(BP_decision_F)
+		.BP_decision(Gshare_Decision /*BP_decision_F*/)
 
 	);
 
 	logic LD_en;
-	logic loop_decision;
+	logic Loop_Decision;
+
+	assign BP_decision_F = (Loop_Decision) ? Loop_Decision : Gshare_Decision;
 
 	LoopDetector LoopDetector(
 		.clk(clk),
@@ -158,7 +161,7 @@ module Processor_Top #(
 
 		.feedback_from_ALU(alu_branch_control_EX),
 
-		.loop_decision(loop_decision),
+		.loop_decision(Loop_Decision),
 		.LD_en(LD_en)
 	);
 	
@@ -569,7 +572,7 @@ module MUX_PC #(
 	
 	input logic branch_correction,
 
-	input logic branch_en,
+	//input logic branch_en,
 	input logic branch_en_F,
 	input logic branch_en_EX,
 
@@ -599,7 +602,7 @@ module MUX_PC #(
 
 		else
 		begin
-			case({program_counter_controller , branch_en})
+			case({program_counter_controller , branch_en_F})
 				3'b010: 	begin  out = normal_F; 	end //normal
 				3'b100: 	begin  out = jump; 		end //jump
 				default: 	begin  out = normal_F ; 	end //begin  out = 32'd4; 	end

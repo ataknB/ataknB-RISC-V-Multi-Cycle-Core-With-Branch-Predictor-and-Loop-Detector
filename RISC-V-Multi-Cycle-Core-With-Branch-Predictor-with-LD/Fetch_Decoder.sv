@@ -63,6 +63,9 @@ module Fetch_Decoder(
             else
             begin
                 branch_en = 1'b0;
+                sub_op_code 	= 	4'd0;
+                imm = 32'd0;
+                sign_extender_type	=	1'b0;
             end
 	end   
 
