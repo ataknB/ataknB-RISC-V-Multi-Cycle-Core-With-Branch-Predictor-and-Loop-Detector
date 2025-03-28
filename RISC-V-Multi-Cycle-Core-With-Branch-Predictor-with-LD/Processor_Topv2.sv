@@ -146,8 +146,6 @@ module Processor_Top #(
 	logic LD_en;
 	logic Loop_Decision;
 
-	assign BP_decision_F = (Loop_Decision) ? Loop_Decision : Gshare_Decision;
-
 	LoopDetector LoopDetector(
 		.clk(clk),
 		.rst(rst),
@@ -165,7 +163,7 @@ module Processor_Top #(
 		.LD_en(LD_en)
 	);
 	
-	
+	assign BP_decision_F = (Loop_Decision) ? Loop_Decision : Gshare_Decision;
 
 //////////////////////////////////////////////////		
 	Decode_Register Decode_Reg_(

@@ -42,7 +42,7 @@ module LoopDetector #(
             for(i = 0; i < 256 ; i = i+1)
             begin
                 counter_table[i] <= 8'd0;
-                memory_table[i] <= {1'd1 , 8'd0};
+                memory_table[i] <= {1'd0 , 8'd0};
             end
         end
 
@@ -50,13 +50,11 @@ module LoopDetector #(
         begin
             if(loop_en && branch_en_F)
             begin
-                //memory_table[PC_F[7:0]][8] <= 1'd1;
                 counter_table[PC_F[7:0]] <= counter_table[PC_F[7:0]] + 8'd1;
                 temp_counter <= counter_table[PC_F[7:0]] + 8'd1;
                 /*
                 counter_table[PC_F[7:0]] <= temp_counter;
                 */
-                
             end
 
             else
