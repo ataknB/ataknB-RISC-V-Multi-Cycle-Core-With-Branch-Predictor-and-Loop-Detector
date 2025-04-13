@@ -232,6 +232,7 @@ module Processor_Top #(
 	
 	//logic mem_read_en;
 	logic mem_read_en_DE;
+	logic mem_read_en_EX;
 	logic mem_read_en_MEM;
 	
 	//logic mem_write_en;
